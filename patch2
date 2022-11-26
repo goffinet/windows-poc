@@ -1,45 +1,27 @@
---- test-nodes/Vagrantfile	2022-05-28 08:46:58.716333579 +0000
-+++ test-nodes/Vagrantfile	2022-05-28 11:08:10.309325957 +0000
-@@ -64,7 +64,7 @@
-             lv.memory = 2048
-             # replace the default synced_folder with something that works in the base box.
-             # NB for some reason, this does not work when placed in the base box Vagrantfile.
--            config.vm.synced_folder '.', '/vagrant', type: 'smb', smb_username: ENV['USER'], smb_password: ENV['VAGRANT_SMB_PASSWORD']
+--- test-nodes/Vagrantfile	2022-11-26 18:44:22
++++ test-nodes/Vagrantfile.new	2022-11-26 18:44:13
+@@ -94,7 +94,7 @@
+     config.vm.define "ubuntu" do |config|
+         config.vm.provider :libvirt do |lv, config|
+             lv.memory = 512
+-            config.vm.synced_folder '.', '/vagrant', type: 'nfs'
 +            config.vm.synced_folder '.', '/vagrant', type: 'rsync', rsync__exclude: ['.vagrant/','.git/','*.box']
          end
          config.vm.provider :virtualbox do |v, override|
-             v.memory = 2048
-@@ -88,47 +88,6 @@
-         config.vm.provision "shell", path: "provision/ps.ps1", args: "provision-powershell-activedirectory-module.ps1"
-         config.vm.provision "shell", inline: "$env:chocolateyVersion='0.12.1'; iwr https://chocolatey.org/install.ps1 -UseBasicParsing | iex", name: "Install Chocolatey"
-         config.vm.provision "shell", path: "provision/ps.ps1", args: "provision-google-chrome.ps1"
--        config.vm.provision "shell", path: "provision/ps.ps1", args: "provision-whoami-web.ps1"
--    end
--
--    config.vm.define "ubuntu" do |config|
--        config.vm.provider :libvirt do |lv, config|
--            lv.memory = 512
--            config.vm.synced_folder '.', '/vagrant', type: 'nfs'
--        end
--        config.vm.provider :virtualbox do |v, override|
--            v.memory = 512
--        end
--        config.vm.provider :hyperv do |hv, config|
--            hv.memory = 512
--        end
--        config.vm.box = "ubuntu-20.04-amd64"
--        config.vm.hostname = "ubuntu.#{$domain}"
--        config.vm.network "private_network",
--            ip: $ubuntu_ip_address,
--            libvirt__forward_mode: "route",
--            libvirt__dhcp_enabled: false,
--            hyperv__bridge: "windows-domain-controller"
+             v.memory = 512
+@@ -109,26 +109,26 @@
+             libvirt__forward_mode: "route",
+             libvirt__dhcp_enabled: false,
+             hyperv__bridge: "windows-domain-controller"
 -        config.vm.provision "shell", path: "provision/configure-hyperv-guest.sh", args: [$ubuntu_ip_address]
 -        config.vm.provision "shell", path: "provision/provision-base.sh"
 -        config.vm.provision "shell", path: "provision/add-to-domain.sh", args: [$domain, $domain_ip_address]
--        config.vm.provision "reload"
--    end
--
++        #config.vm.provision "shell", path: "provision/configure-hyperv-guest.sh", args: [$ubuntu_ip_address]
++        #config.vm.provision "shell", path: "provision/provision-base.sh"
++        #config.vm.provision "shell", path: "provision/add-to-domain.sh", args: [$domain, $domain_ip_address]
+         config.vm.provision "reload"
+     end
+
 -    config.trigger.before :up do |trigger|
 -        trigger.run = {
 -            inline: '''bash -euc \'
@@ -55,6 +37,21 @@
 -\'
 -'''
 -        }
-+        #config.vm.provision "shell", path: "provision/ps.ps1", args: "provision-whoami-web.ps1"
-     end
+-    end
++#    config.trigger.before :up do |trigger|
++#        trigger.run = {
++#            inline: '''bash -euc \'
++#certs=(
++#    ../tmp/ExampleEnterpriseRootCA.der
++#)
++#for cert_path in "${certs[@]}"; do
++#    if [ -f $cert_path ]; then
++#        mkdir -p tmp
++#        cp $cert_path tmp
++#    fi
++#done
++#\'
++#'''
++#        }
++#    end
  end
