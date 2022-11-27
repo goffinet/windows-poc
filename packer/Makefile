@@ -49,12 +49,12 @@ help:
 	@$(addprefix echo make ,$(addsuffix ;,$(VSPHERE_BUILDS)))
 
 # Target specific pattern rules for build-* targets
-$(VIRTUALBOX_BUILDS): build-%-virtualbox: %-amd64-virtualbox.box
-$(LIBVIRT_BUILDS): build-%-libvirt: %-amd64-libvirt.box
-$(HYPERV_BUILDS): build-%-hyperv: %-amd64-hyperv.box
-$(VSPHERE_BUILDS): build-%-vsphere: %-amd64-vsphere.box
+$(VIRTUALBOX_BUILDS): build-%-virtualbox: %-amd64-virtualbox
+$(LIBVIRT_BUILDS): build-%-libvirt: %-amd64-libvirt
+$(HYPERV_BUILDS): build-%-hyperv: %-amd64-hyperv
+$(VSPHERE_BUILDS): build-%-vsphere: %-amd64-vsphere
 
-%-amd64-virtualbox.box: %.pkr.hcl %/autounattend.xml Vagrantfile.template *.ps1 drivers
+%-amd64-virtualbox: %.pkr.hcl %/autounattend.xml Vagrantfile.template *.ps1 drivers
 	rm -f $@
 	CHECKPOINT_DISABLE=1 PACKER_LOG=1 PACKER_LOG_PATH=$*-amd64-virtualbox-packer-init.log \
 		packer init $*.pkr.hcl
@@ -67,7 +67,7 @@ $(VSPHERE_BUILDS): build-%-vsphere: %-amd64-vsphere.box
 	@echo to add to local vagrant install do:
 	@echo vagrant box add -f $*-amd64 $@
 
-%-amd64-libvirt.box: %.pkr.hcl %/autounattend.xml Vagrantfile.template *.ps1 drivers
+%-amd64-libvirt: %.pkr.hcl %/autounattend.xml Vagrantfile.template *.ps1 drivers
 	rm -f $@
 	CHECKPOINT_DISABLE=1 PACKER_LOG=1 PACKER_LOG_PATH=$*-amd64-libvirt-packer-init.log \
 		packer init $*.pkr.hcl
@@ -80,7 +80,7 @@ $(VSPHERE_BUILDS): build-%-vsphere: %-amd64-vsphere.box
 	@echo to add to local vagrant install do:
 	@echo vagrant box add -f $*-amd64 $@
 
-%-amd64-hyperv.box: %.pkr.hcl Vagrantfile.template *.ps1
+%-amd64-hyperv: %.pkr.hcl Vagrantfile.template *.ps1
 	rm -f $@
 	mkdir -p tmp
 	CHECKPOINT_DISABLE=1 PACKER_LOG=1 PACKER_LOG_PATH=$*-amd64-hyperv-packer-init.log \
@@ -94,7 +94,7 @@ $(VSPHERE_BUILDS): build-%-vsphere: %-amd64-vsphere.box
 	@echo to add to local vagrant install do:
 	@echo vagrant box add -f $*-amd64 $@
 
-%-uefi-amd64-virtualbox.box: %-uefi.pkr.hcl %-uefi/autounattend.xml Vagrantfile-uefi.template *.ps1 drivers
+%-uefi-amd64-virtualbox: %-uefi.pkr.hcl %-uefi/autounattend.xml Vagrantfile-uefi.template *.ps1 drivers
 	rm -f $@
 	CHECKPOINT_DISABLE=1 PACKER_LOG=1 PACKER_LOG_PATH=$*-uefi-amd64-virtualbox-packer-init.log \
 		packer init $*.pkr.hcl
@@ -107,7 +107,7 @@ $(VSPHERE_BUILDS): build-%-vsphere: %-amd64-vsphere.box
 	@echo to add to local vagrant install do:
 	@echo vagrant box add -f $*-uefi-amd64 $@
 
-%-uefi-amd64-libvirt.box: %-uefi.pkr.hcl %-uefi/autounattend.xml Vagrantfile-uefi.template *.ps1 drivers
+%-uefi-amd64-libvirt: %-uefi.pkr.hcl %-uefi/autounattend.xml Vagrantfile-uefi.template *.ps1 drivers
 	rm -f $@
 	CHECKPOINT_DISABLE=1 PACKER_LOG=1 PACKER_LOG_PATH=$*-uefi-amd64-libvirt-packer-init.log \
 		packer init $*.pkr.hcl
@@ -142,7 +142,7 @@ tmp/%-vsphere/autounattend.xml: %/autounattend.xml
 	@#        restart the installation.
 	sed -E 's,(.+)</DriverPaths>,\1    <PathAndCredentials wcm:action="add" wcm:keyValue="2"><Path>E:\\</Path></PathAndCredentials>\n\0,g' $< >$@
 
-%-amd64-vsphere.box: %-vsphere.pkr.hcl tmp/%-vsphere/autounattend.xml Vagrantfile.template *.ps1
+%-amd64-vsphere: %-vsphere.pkr.hcl tmp/%-vsphere/autounattend.xml Vagrantfile.template *.ps1
 	rm -f $@
 	CHECKPOINT_DISABLE=1 PACKER_LOG=1 PACKER_LOG_PATH=$*-amd64-vsphere-packer-init.log \
 		packer init $*.pkr.hcl
@@ -169,7 +169,7 @@ tmp/%-vsphere/autounattend.xml: %/autounattend.xml
 	@echo to add to local vagrant install do:
 	@echo vagrant box add -f $*-amd64 $@
 
-%-uefi-amd64-vsphere.box: %-uefi-vsphere.pkr.hcl tmp/%-uefi-vsphere/autounattend.xml Vagrantfile-uefi.template *.ps1
+%-uefi-amd64-vsphere: %-uefi-vsphere.pkr.hcl tmp/%-uefi-vsphere/autounattend.xml Vagrantfile-uefi.template *.ps1
 	rm -f $@
 	CHECKPOINT_DISABLE=1 PACKER_LOG=1 PACKER_LOG_PATH=$*-uefi-amd64-vsphere-packer-init.log \
 		packer init $*.pkr.hcl
@@ -212,4 +212,4 @@ drivers:
 	mv drivers.tmp drivers
 
 clean:
-	rm -rf *.log *.box
+	rm -rf *.log *
