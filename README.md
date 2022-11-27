@@ -1,5 +1,7 @@
 # Windows POC
 
+Use other example on https://github.com/tothi/ad-honeypot-autodeploy to convert it qemu image for terraform
+
 Help tools to :
 
 - install Hashicorp products with qemu/kvm Libvirt

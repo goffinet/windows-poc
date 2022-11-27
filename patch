@@ -1,0 +1,125 @@
+diff --git a/Vagrantfile b/Vagrantfile
+index 521cfd8..376d096 100644
+--- a/Vagrantfile
++++ b/Vagrantfile
+@@ -20,10 +20,10 @@ Vagrant.configure("2") do |config|
+         lv.memory = 2048
+         lv.cpus = 2
+         lv.cpu_mode = 'host-passthrough'
+-        lv.keymap = 'pt'
++        lv.keymap = 'fr'
+         # replace the default synced_folder with something that works in the base box.
+         # NB for some reason, this does not work when placed in the base box Vagrantfile.
+-        config.vm.synced_folder '.', '/vagrant', type: 'smb', smb_username: ENV['USER'], smb_password: ENV['VAGRANT_SMB_PASSWORD']
++        config.vm.synced_folder '.', '/vagrant', type: 'rsync', rsync__exclude: ['.vagrant/','.git/','*.box']
+     end
+ 
+     config.vm.provider :virtualbox do |v, override|
+diff --git a/provision/provision-base.ps1 b/provision/provision-base.ps1
+index 424c25d..d9425e0 100644
+--- a/provision/provision-base.ps1
++++ b/provision/provision-base.ps1
+@@ -1,10 +1,10 @@
+ # set keyboard layout.
+ # NB you can get the name from the list:
+ #      [Globalization.CultureInfo]::GetCultures('InstalledWin32Cultures') | Out-GridView
+-Set-WinUserLanguageList pt-PT -Force
++Set-WinUserLanguageList fr-FR -Force
+ 
+ # set the date format, number format, etc.
+-Set-Culture pt-PT
++Set-Culture fr-FR
+ 
+ # set the welcome screen culture and keyboard layout.
+ # NB the .DEFAULT key is for the local SYSTEM account (S-1-5-18).
+diff --git a/test-nodes/Vagrantfile b/test-nodes/Vagrantfile
+index 44b93d2..d6216f3 100644
+--- a/test-nodes/Vagrantfile
++++ b/test-nodes/Vagrantfile
+@@ -10,7 +10,7 @@ Vagrant.configure("2") do |config|
+     config.vm.provider :libvirt do |lv, config|
+         lv.cpus = 2
+         lv.cpu_mode = 'host-passthrough'
+-        lv.keymap = 'pt'
++        lv.keymap = 'fr'
+     end
+ 
+     config.vm.provider :virtualbox do |v, override|
+@@ -94,7 +94,7 @@ Vagrant.configure("2") do |config|
+     config.vm.define "ubuntu" do |config|
+         config.vm.provider :libvirt do |lv, config|
+             lv.memory = 512
+-            config.vm.synced_folder '.', '/vagrant', type: 'nfs'
++            config.vm.synced_folder '.', '/vagrant', type: 'rsync', rsync__exclude: ['.vagrant/','.git/','*.box']
+         end
+         config.vm.provider :virtualbox do |v, override|
+             v.memory = 512
+@@ -109,26 +109,26 @@ Vagrant.configure("2") do |config|
+             libvirt__forward_mode: "route",
+             libvirt__dhcp_enabled: false,
+             hyperv__bridge: "windows-domain-controller"
+-        config.vm.provision "shell", path: "provision/configure-hyperv-guest.sh", args: [$ubuntu_ip_address]
+-        config.vm.provision "shell", path: "provision/provision-base.sh"
+-        config.vm.provision "shell", path: "provision/add-to-domain.sh", args: [$domain, $domain_ip_address]
++        #config.vm.provision "shell", path: "provision/configure-hyperv-guest.sh", args: [$ubuntu_ip_address]
++        #config.vm.provision "shell", path: "provision/provision-base.sh"
++        #config.vm.provision "shell", path: "provision/add-to-domain.sh", args: [$domain, $domain_ip_address]
+         config.vm.provision "reload"
+     end
+ 
+-    config.trigger.before :up do |trigger|
+-        trigger.run = {
+-            inline: '''bash -euc \'
+-certs=(
+-    ../tmp/ExampleEnterpriseRootCA.der
+-)
+-for cert_path in "${certs[@]}"; do
+-    if [ -f $cert_path ]; then
+-        mkdir -p tmp
+-        cp $cert_path tmp
+-    fi
+-done
+-\'
+-'''
+-        }
+-    end
++#    config.trigger.before :up do |trigger|
++#        trigger.run = {
++#            inline: '''bash -euc \'
++#certs=(
++#    ../tmp/ExampleEnterpriseRootCA.der
++#)
++#for cert_path in "${certs[@]}"; do
++#    if [ -f $cert_path ]; then
++#        mkdir -p tmp
++#        cp $cert_path tmp
++#    fi
++#done
++#\'
++#'''
++#        }
++#    end
+ end
+diff --git a/test-nodes/provision/locale.ps1 b/test-nodes/provision/locale.ps1
+index 2d5d2c4..75e8d02 100644
+--- a/test-nodes/provision/locale.ps1
++++ b/test-nodes/provision/locale.ps1
+@@ -6,10 +6,10 @@ $ErrorActionPreference = 'Stop'
+ # set keyboard layout.
+ # NB you can get the name from the list:
+ #      [System.Globalization.CultureInfo]::GetCultures('InstalledWin32Cultures') | out-gridview
+-Set-WinUserLanguageList pt-PT -Force
++Set-WinUserLanguageList fr-FR -Force
+ 
+ # set the date format, number format, etc.
+-Set-Culture pt-PT
++Set-Culture fr-FR
+ 
+ # set the timezone.
+ # tzutil /l lists all available timezone ids
+@@ -87,4 +87,4 @@ function Set-WinLogonLanguageList {
+     }
+ }
+ 
+-Set-WinLogonLanguageList -LanguageList pt-PT,en-US
++Set-WinLogonLanguageList -LanguageList fr-FR,en-US

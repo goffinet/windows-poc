@@ -80,29 +80,34 @@ systemctl restart libvirtd
 # see /usr/share/polkit-1/rules.d/60-libvirt.rules
 usermod -aG libvirt vagrant
 
+# install terraform.new
+wget -O- https://apt.releases.hashicorp.com/gpg | gpg --dearmor | sudo tee /usr/share/keyrings/hashicorp-archive-keyring.gpg
+echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/hashicorp.list
+sudo apt update && sudo apt install terraform
+
 # install terraform.
-terraform_version=1.0.10
-terraform_url="https://releases.hashicorp.com/terraform/$terraform_version/terraform_${terraform_version}_linux_amd64.zip"
-terraform_filename="$(basename $terraform_url)"
-wget -q $terraform_url
-unzip $terraform_filename
-install terraform /usr/local/bin
-rm terraform $terraform_filename
-# install the libvirt provider.
-terraform_libvirt_provider_version=0.6.11
-terraform_libvirt_provider_url="/https://github.com/dmacvicar/terraform-provider-libvirt/releases/download/v${terraform_libvirt_provider_version}/terraform-provider-libvirt_${terraform_libvirt_provider_version}_linux_amd64.zip"
-terraform_libvirt_provider_filename="/tmp/$(basename $terraform_libvirt_provider_url)"
-wget -qO $terraform_libvirt_provider_filename $terraform_libvirt_provider_url
-su vagrant -c bash <<VAGRANT_EOF
+#terraform_version=1.0.10
+#terraform_url="https://releases.hashicorp.com/terraform/$terraform_version/terraform_${terraform_version}_linux_amd64.zip"
+#terraform_filename="$(basename $terraform_url)"
+#wget -q $terraform_url
+#unzip $terraform_filename
+#install terraform /usr/local/bin
+#rm terraform $terraform_filename
+## install the libvirt provider.
+#terraform_libvirt_provider_version=0.6.11
+#terraform_libvirt_provider_url="/https://github.com/dmacvicar/terraform-provider-libvirt/releases/download/v${terraform_libvirt_provider_version}/terraform-provider-libvirt_${terraform_libvirt_provider_version}_linux_amd64.zip"
+#terraform_libvirt_provider_filename="/tmp/$(basename $terraform_libvirt_provider_url)"
+#wget -qO $terraform_libvirt_provider_filename $terraform_libvirt_provider_url
+#su vagrant -c bash <<VAGRANT_EOF
 #!/bin/bash
-set -euxo pipefail
-cd ~
-unzip $terraform_libvirt_provider_filename
-install -d ~/.terraform.d/plugins/linux_amd64
-install terraform-provider-libvirt ~/.terraform.d/plugins/linux_amd64/
-rm terraform-provider-libvirt
-VAGRANT_EOF
-rm $terraform_libvirt_provider_filename
+#set -euxo pipefail
+#cd ~
+#unzip $terraform_libvirt_provider_filename
+#install -d ~/.terraform.d/plugins/linux_amd64
+#install terraform-provider-libvirt ~/.terraform.d/plugins/linux_amd64/
+#rm terraform-provider-libvirt
+#VAGRANT_EOF
+#rm $terraform_libvirt_provider_filename
 
 # install Packer.
 apt install -y unzip
